@@ -1,0 +1,39 @@
+{
+  "name": "octosts-action",
+  "version": "1.0.0",
+  "description": "Generate a short-lived GitHub Token using OctoSTS",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/launchdarkly-labs/octosts-action.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "release": "concurrently \"ncc build src/run/index.ts -o dist/run\" \"ncc build src/post-run/index.ts -o dist/post-run\"",
+    "check-all": "concurrently \"npm:format-check\" \"npm:lint\" \"npm:build\"",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "lint": "eslint **/*.ts"
+  },
+  "keywords": [
+    "Actions",
+    "GitHub",
+    "ChainGuard",
+    "octo-sts"
+  ],
+  "author": "The LaunchDarkly Team",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1",
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1",
+    "@actions/http-client": "^2.2.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.6",
+    "@types/node": "^24.0.10",
+    "@vercel/ncc": "^0.38.3",
+    "concurrently": "^9.2.0",
+    "typescript": "^5.8.3"
+  }
+}
