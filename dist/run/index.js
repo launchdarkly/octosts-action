@@ -25742,8 +25742,8 @@ function getInputs() {
     };
 }
 function getActionsEnvVars() {
-    const actionsToken = process.env.ACTIONS_TOKEN;
-    const actionsUrl = process.env.ACTIONS_URL;
+    const actionsToken = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+    const actionsUrl = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
     if (!actionsToken || !actionsUrl) {
         core.setFailed('Missing required environment variables - have you set \'id-token: write\' in your workflow?');
     }
