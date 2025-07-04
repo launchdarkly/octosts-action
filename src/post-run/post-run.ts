@@ -1,23 +1,29 @@
-import * as core from "@actions/core"
-import * as httm from "@actions/http-client"
+import * as core from "@actions/core";
+import { Agent, fetch, setGlobalDispatcher } from "undici";
 
 export async function postRun(): Promise<void> {
-    try {
-        const token = core.getState('token')
+	try {
+		const agent = new Agent({ allowH2: true });
+		setGlobalDispatcher(agent);
 
-        const httpClient = new httm.HttpClient('octosts-action')
+		const token = core.getState("token");
 
-        const rep = await httpClient.del('https://api.github.com/installation/token', {
-            authorization: `Bearer ${token}`,
-            accept: 'application/vnd.github+json'
-        })
+		const rep = await fetch("https://api.github.com/installation/token", {
+			method: "DELETE",
+			headers: {
+				authorization: `Bearer ${token}`,
+				accept: "application/vnd.github+json",
+			},
+		});
 
-        if (rep.message.statusCode == 204) {
-            core.info('Successfully deleted token')
-        } else {
-            core.setFailed(`Failed to delete token: ${rep.message.statusCode} ${rep.message.statusMessage}`)
-        }
-    } catch (error) {
-        core.setFailed((error as Error).message)
-    }
+		if (rep.status == 204) {
+			core.info("Successfully deleted token");
+		} else {
+			return core.setFailed(
+				`Failed to delete token: ${rep.status} ${rep.statusText}`,
+			);
+		}
+	} catch (error) {
+		return core.setFailed((error as Error).message);
+	}
 }

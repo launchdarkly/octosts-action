@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
-import {run} from './octosts-action'
+import * as core from "@actions/core";
+import { run } from "./octosts-action";
 
-run().catch(error => core.setFailed((error as Error).message))
+run().catch((error) => core.setFailed((error as Error).message));
