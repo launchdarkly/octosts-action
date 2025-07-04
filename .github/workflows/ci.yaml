@@ -10,9 +10,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
         with:
+          node-version: 20
           cache: 'pnpm'
+      - run: pnpm install
       - run: pnpm biome ci
       - uses: chainguard-dev/actions/nodiff@main
         with:
@@ -23,9 +28,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - uses: actions/setup-node@v4
         with:
+          node-version: 20
           cache: 'pnpm'
+      - run: pnpm install
       - run: pnpm run release
       - uses: chainguard-dev/actions/nodiff@main
         with:
