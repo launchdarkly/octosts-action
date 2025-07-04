@@ -1,0 +1,33 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+      - run: pnpm biome ci
+      - uses: chainguard-dev/actions/nodiff@main
+        with:
+          path: '.'
+          fixup-command: 'pnpm run format'
+
+  compile:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+      - run: pnpm run release
+      - uses: chainguard-dev/actions/nodiff@main
+        with:
+          path: '.'
+          fixup-command: 'pnpm run release'
