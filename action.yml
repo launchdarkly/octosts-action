@@ -6,7 +6,7 @@ description: |
 inputs:
   domain:
     description: The domain of the OctoSTS instance to federate against.
-    default: octo-sts.dev
+    default: octo-sts.dev # TODO: Set whatever domain we decide to run our instance on as the default
 
   scope:
     description: The org, and optionally repo, of the repository which contains the trust policy.
