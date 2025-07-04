@@ -56894,20 +56894,20 @@ function run() {
             });
             const octoStsRepJson = yield octoStsRep.json();
             if (!(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token)) {
-                core.setFailed(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.message);
+                return core.setFailed(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.message);
             }
             const tokHash = crypto
                 .createHash('sha256')
                 .update(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token)
                 .digest('hex');
-            core.info(`Created token with hash: ${tokHash}`);
             core.setSecret(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             core.setOutput('token', octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             core.saveState('token', octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
+            return core.info(`Created token with hash: ${tokHash}`);
         }
         catch (error) {
             core.debug(JSON.stringify(error));
-            core.setFailed(error.message);
+            return core.setFailed(error.message);
         }
     });
 }

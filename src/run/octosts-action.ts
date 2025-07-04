@@ -41,20 +41,20 @@ export async function run(): Promise<void> {
         const octoStsRepJson = await octoStsRep.json() as OctoStsRep
 
         if (!octoStsRepJson?.token) {
-            core.setFailed(octoStsRepJson?.message as string)
+            return core.setFailed(octoStsRepJson?.message as string)
         }
 
         const tokHash = crypto
             .createHash('sha256')
             .update(octoStsRepJson?.token as string)
             .digest('hex')
-        core.info(`Created token with hash: ${tokHash}`)
 
         core.setSecret(octoStsRepJson?.token as string)
         core.setOutput('token', octoStsRepJson?.token)
         core.saveState('token', octoStsRepJson?.token)
+        return core.info(`Created token with hash: ${tokHash}`)
     } catch (error) {
         core.debug(JSON.stringify(error))
-        core.setFailed((error as Error).message)
+        return core.setFailed((error as Error).message)
     }
 }
