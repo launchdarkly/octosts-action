@@ -1,6 +1,5 @@
 import * as crypto from "node:crypto";
 import * as core from "@actions/core"
-import * as httm from "@actions/http-client"
 import {getActionsEnvVars, getInputs} from "./inputs";
 import {Agent, fetch, setGlobalDispatcher} from "undici";
 
@@ -32,8 +31,9 @@ export async function run(): Promise<void> {
         }
         core.debug(JSON.stringify(ghRepJson))
 
+        core.debug(`Creating token for ${identity} using ${scope} against ${domain}`)
         const octoStsRep = await fetch(
-            `https://${domain}/sts/exchange?scope${scope}&identity=${identity}`, {
+            `https://${domain}/sts/exchange?scope=${scope}&identity=${identity}`, {
             headers: {
                 authorization: `Bearer ${ghRepJson.value}`
             }

@@ -56886,7 +56886,8 @@ function run() {
                 core.setSecret(ghRepJson.value);
             }
             core.debug(JSON.stringify(ghRepJson));
-            const octoStsRep = yield (0, undici_1.fetch)(`https://${domain}/sts/exchange?scope${scope}&identity=${identity}`, {
+            core.debug(`Creating token for ${identity} using ${scope} against ${domain}`);
+            const octoStsRep = yield (0, undici_1.fetch)(`https://${domain}/sts/exchange?scope=${scope}&identity=${identity}`, {
                 headers: {
                     authorization: `Bearer ${ghRepJson.value}`
                 }
