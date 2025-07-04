@@ -56744,7 +56744,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(9999));
 const octosts_action_1 = __nccwpck_require__(7677);
-(0, octosts_action_1.run)().catch(error => core.setFailed(error.message));
+(0, octosts_action_1.run)().catch((error) => core.setFailed(error.message));
 
 
 /***/ }),
@@ -56792,24 +56792,24 @@ exports.getInputs = getInputs;
 exports.getActionsEnvVars = getActionsEnvVars;
 const core = __importStar(__nccwpck_require__(9999));
 function getInputs() {
-    const domain = core.getInput('domain');
-    const scope = core.getInput('scope');
-    const identity = core.getInput('identity');
+    const domain = core.getInput("domain");
+    const scope = core.getInput("scope");
+    const identity = core.getInput("identity");
     return {
         domain,
         scope,
-        identity
+        identity,
     };
 }
 function getActionsEnvVars() {
     const actionsToken = process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
     const actionsUrl = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
     if (!actionsToken || !actionsUrl) {
-        core.setFailed('Missing required environment variables - have you set \'id-token: write\' in your workflow?');
+        core.setFailed("Missing required environment variables - have you set 'id-token: write' in your workflow?");
     }
     return {
         actionsToken: actionsToken,
-        actionsUrl: actionsUrl
+        actionsUrl: actionsUrl,
     };
 }
 
@@ -56879,9 +56879,9 @@ function run() {
             const ghRep = yield (0, undici_1.fetch)(`${actionsUrl}&audience=${domain}`, {
                 headers: {
                     authorization: `Bearer ${actionsToken}`,
-                }
+                },
             });
-            const ghRepJson = yield ghRep.json();
+            const ghRepJson = (yield ghRep.json());
             if (ghRepJson.value !== null) {
                 core.setSecret(ghRepJson.value);
             }
@@ -56889,20 +56889,20 @@ function run() {
             core.debug(`Creating token for ${identity} using ${scope} against ${domain}`);
             const octoStsRep = yield (0, undici_1.fetch)(`https://${domain}/sts/exchange?scope=${scope}&identity=${identity}`, {
                 headers: {
-                    authorization: `Bearer ${ghRepJson.value}`
-                }
+                    authorization: `Bearer ${ghRepJson.value}`,
+                },
             });
-            const octoStsRepJson = yield octoStsRep.json();
+            const octoStsRepJson = (yield octoStsRep.json());
             if (!(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token)) {
                 return core.setFailed(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.message);
             }
             const tokHash = crypto
-                .createHash('sha256')
+                .createHash("sha256")
                 .update(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token)
-                .digest('hex');
+                .digest("hex");
             core.setSecret(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
-            core.setOutput('token', octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
-            core.saveState('token', octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
+            core.setOutput("token", octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
+            core.saveState("token", octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             return core.info(`Created token with hash: ${tokHash}`);
         }
         catch (error) {
