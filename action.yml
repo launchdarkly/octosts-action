@@ -26,4 +26,4 @@ outputs:
 runs:
   using: node20
   main: 'dist/run/index.js'
-  post: 'dist/post/index.js'
+  post: 'dist/post-run/index.js'

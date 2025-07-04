@@ -25811,7 +25811,7 @@ const httm = __importStar(__nccwpck_require__(787));
 const inputs_1 = __nccwpck_require__(8642);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         try {
             const { actionsToken, actionsUrl } = (0, inputs_1.getActionsEnvVars)();
             const { domain, scope, identity } = (0, inputs_1.getInputs)();
@@ -25819,22 +25819,27 @@ function run() {
             const ghRep = yield httpClient.getJson(`${actionsUrl}&audience=${domain}`, {
                 authorization: `Bearer ${actionsToken}`,
             });
+            if (((_a = ghRep.result) === null || _a === void 0 ? void 0 : _a.value) !== null) {
+                core.setSecret(ghRep.result.value);
+            }
+            core.debug(JSON.stringify(ghRep));
             const octoStsRep = yield httpClient.getJson(`https://${domain}/sts/exchange?scope${scope}&identity=${identity}`, {
-                authorization: `Bearer ${(_a = ghRep.result) === null || _a === void 0 ? void 0 : _a.value}`
+                authorization: `Bearer ${(_b = ghRep.result) === null || _b === void 0 ? void 0 : _b.value}`
             });
-            if (!((_b = octoStsRep.result) === null || _b === void 0 ? void 0 : _b.token)) {
-                core.setFailed((_c = octoStsRep.result) === null || _c === void 0 ? void 0 : _c.message);
+            if (!((_c = octoStsRep.result) === null || _c === void 0 ? void 0 : _c.token)) {
+                core.setFailed((_d = octoStsRep.result) === null || _d === void 0 ? void 0 : _d.message);
             }
             const tokHash = crypto
                 .createHash('sha256')
-                .update((_d = octoStsRep.result) === null || _d === void 0 ? void 0 : _d.token)
+                .update((_e = octoStsRep.result) === null || _e === void 0 ? void 0 : _e.token)
                 .digest('hex');
             core.info(`Created token with hash: ${tokHash}`);
-            core.setSecret((_e = octoStsRep.result) === null || _e === void 0 ? void 0 : _e.token);
-            core.setOutput('token', (_f = octoStsRep.result) === null || _f === void 0 ? void 0 : _f.token);
-            core.saveState('token', (_g = octoStsRep.result) === null || _g === void 0 ? void 0 : _g.token);
+            core.setSecret((_f = octoStsRep.result) === null || _f === void 0 ? void 0 : _f.token);
+            core.setOutput('token', (_g = octoStsRep.result) === null || _g === void 0 ? void 0 : _g.token);
+            core.saveState('token', (_h = octoStsRep.result) === null || _h === void 0 ? void 0 : _h.token);
         }
         catch (error) {
+            core.debug(JSON.stringify(error));
             core.setFailed(error.message);
         }
     });

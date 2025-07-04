@@ -23,6 +23,10 @@ export async function run(): Promise<void> {
             `${actionsUrl}&audience=${domain}`, {
             authorization: `Bearer ${actionsToken}`,
         })
+        if (ghRep.result?.value !== null) {
+            core.setSecret(ghRep.result!.value)
+        }
+        core.debug(JSON.stringify(ghRep))
 
         const octoStsRep = await httpClient.getJson<OctoStsRep>(
             `https://${domain}/sts/exchange?scope${scope}&identity=${identity}`, {
@@ -43,6 +47,7 @@ export async function run(): Promise<void> {
         core.setOutput('token', octoStsRep.result?.token)
         core.saveState('token', octoStsRep.result?.token)
     } catch (error) {
+        core.debug(JSON.stringify(error))
         core.setFailed((error as Error).message)
     }
 }
