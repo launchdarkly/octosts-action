@@ -16,7 +16,7 @@ export async function postRun(): Promise<void> {
 			},
 		});
 
-		if (rep.status == 204) {
+		if (rep.status === 204) {
 			core.info("Successfully deleted token");
 		} else {
 			return core.setFailed(

@@ -1,7 +1,7 @@
 import * as crypto from "node:crypto";
 import * as core from "@actions/core";
-import { getActionsEnvVars, getInputs } from "./inputs";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
+import { getActionsEnvVars, getInputs } from "./inputs";
 
 interface GHRep {
 	value: string;
