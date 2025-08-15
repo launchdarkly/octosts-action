@@ -45,7 +45,6 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm run release
-      - run: pnpm run release
       - name: Verify that generated code is committed
         run: |
           results=$(git status --porcelain)
