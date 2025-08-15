@@ -11,6 +11,7 @@ repos:
         name: "Generate action readme files"
         language: system
         entry: pnpx action-docs --no-banner --update-readme
+        files: action.yml$
         stages: [ "pre-commit" ]
 
 
