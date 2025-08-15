@@ -7,9 +7,9 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
@@ -19,15 +19,23 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm biome ci
-      - uses: chainguard-dev/actions/nodiff@main
-        with:
-          path: '.'
-          fixup-command: 'pnpm run format'
+      - run: pnpm run format
+      - name: Verify that generated code is committed
+        run: |
+          results=$(git status --porcelain)
+          if [[ -n "$results" ]]; then
+            echo "Tree has changes:"
+            echo "$results"
+            echo "---------------------------------"
+            git --no-pager diff
+            exit 1
+          fi
+        shell: bash
 
   compile:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
@@ -37,7 +45,15 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm run release
-      - uses: chainguard-dev/actions/nodiff@main
-        with:
-          path: '.'
-          fixup-command: 'pnpm run release'
+      - run: pnpm run release
+      - name: Verify that generated code is committed
+        run: |
+          results=$(git status --porcelain)
+          if [[ -n "$results" ]]; then
+            echo "Tree has changes:"
+            echo "$results"
+            echo "---------------------------------"
+            git --no-pager diff
+            exit 1
+          fi
+        shell: bash
