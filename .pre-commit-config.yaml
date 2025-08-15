@@ -7,9 +7,18 @@ repos:
         language: system
         types: [text]
         stages: [ "pre-commit" ]
+      - id: generate-readme
+        name: "Generate action readme files"
+        language: system
+        entry: pnpx action-docs --no-banner --update-readme
+        stages: [ "pre-commit" ]
+
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+      - id: check-yaml
+      - id: no-commit-to-branch
+        args: [ --branch, main ]
