@@ -6,7 +6,7 @@ description: |
 inputs:
   domain:
     description: The domain of the OctoSTS instance to federate against.
-    default: octo-sts.dev # TODO: Set whatever domain we decide to run our instance on as the default
+    default: octosts.shd.ldinfra.net
 
   scope:
     description: The org, and optionally repo, of the repository which contains the trust policy.
@@ -24,6 +24,6 @@ outputs:
     value: ${{ steps.octo-sts.outputs.token }}
 
 runs:
-  using: node20
+  using: node24
   main: 'dist/run/index.js'
   post: 'dist/post-run/index.js'

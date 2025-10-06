@@ -24,23 +24,36 @@ export async function run(): Promise<void> {
 				authorization: `Bearer ${actionsToken}`,
 			},
 		});
+		if (!ghRep.ok) {
+			const errorText = await ghRep.text();
+			return core.setFailed(`Failed to get installation token: ${errorText}`);
+		}
+
 		const ghRepJson = (await ghRep.json()) as GHRep;
 		if (ghRepJson.value !== null) {
 			core.setSecret(ghRepJson.value);
 		}
 		core.debug(JSON.stringify(ghRepJson));
 
+		const scopes = [scope];
+		const scopesParam = scopes.join(",");
+
 		core.debug(
 			`Creating token for ${identity} using ${scope} against ${domain}`,
 		);
 		const octoStsRep = await fetch(
-			`https://${domain}/sts/exchange?scope=${scope}&identity=${identity}`,
+			`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`,
 			{
 				headers: {
 					authorization: `Bearer ${ghRepJson.value}`,
 				},
 			},
 		);
+
+		if (!octoStsRep.ok) {
+			const errorText = await octoStsRep.text();
+			return core.setFailed(`Failed to fetch from OctoSTS: ${errorText}`);
+		}
 		const octoStsRepJson = (await octoStsRep.json()) as OctoStsRep;
 
 		if (!octoStsRepJson?.token) {

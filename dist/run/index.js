@@ -56881,17 +56881,27 @@ function run() {
                     authorization: `Bearer ${actionsToken}`,
                 },
             });
+            if (!ghRep.ok) {
+                const errorText = yield ghRep.text();
+                return core.setFailed(`Failed to get installation token: ${errorText}`);
+            }
             const ghRepJson = (yield ghRep.json());
             if (ghRepJson.value !== null) {
                 core.setSecret(ghRepJson.value);
             }
             core.debug(JSON.stringify(ghRepJson));
+            const scopes = [scope];
+            const scopesParam = scopes.join(",");
             core.debug(`Creating token for ${identity} using ${scope} against ${domain}`);
-            const octoStsRep = yield (0, undici_1.fetch)(`https://${domain}/sts/exchange?scope=${scope}&identity=${identity}`, {
+            const octoStsRep = yield (0, undici_1.fetch)(`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`, {
                 headers: {
                     authorization: `Bearer ${ghRepJson.value}`,
                 },
             });
+            if (!octoStsRep.ok) {
+                const errorText = yield octoStsRep.text();
+                return core.setFailed(`Failed to fetch from OctoSTS: ${errorText}`);
+            }
             const octoStsRepJson = (yield octoStsRep.json());
             if (!(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token)) {
                 return core.setFailed(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.message);
