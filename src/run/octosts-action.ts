@@ -1,5 +1,6 @@
 import * as crypto from "node:crypto";
 import * as core from "@actions/core";
+import * as exec from "@actions/exec";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
 import { getActionsEnvVars, getInputs } from "./inputs";
 
@@ -17,7 +18,7 @@ export async function run(): Promise<void> {
 		const agent = new Agent({ allowH2: true });
 		setGlobalDispatcher(agent);
 		const { actionsToken, actionsUrl } = getActionsEnvVars();
-		const { domain, scope, identity } = getInputs();
+		const { domain, scope, identity, configureGit } = getInputs();
 
 		const ghRep = await fetch(`${actionsUrl}&audience=${domain}`, {
 			headers: {
@@ -68,7 +69,41 @@ export async function run(): Promise<void> {
 		core.setSecret(octoStsRepJson?.token as string);
 		core.setOutput("token", octoStsRepJson?.token);
 		core.saveState("token", octoStsRepJson?.token);
-		return core.info(`Created token with hash: ${tokHash}`);
+		core.info(`Created token with hash: ${tokHash}`);
+
+		if (configureGit) {
+			const b64Token = Buffer.from(
+				`x-access-token:${octoStsRepJson?.token as string}`,
+			).toString("base64");
+			try {
+				await exec.exec("git", [
+					"config",
+					"--global",
+					"--unset-all",
+					"http.https://github.com/.extraheader",
+					"^AUTHORIZATION: basic",
+				]);
+			} catch (_error) {
+				// Ignore the error if the config key doesn't exist
+				core.debug("No existing extraheader to unset");
+			}
+
+			// Set the token as a git credential
+			await exec.exec("git", [
+				"config",
+				"--global",
+				"http.https://github.com/.extraheader",
+				`AUTHORIZATION: basic ${b64Token}`,
+			]);
+			await exec.exec("git", [
+				"config",
+				"--global",
+				"url.https://github.com/.insteadOf",
+				`git@github.com`,
+			]);
+		}
+
+		return;
 	} catch (error) {
 		core.debug(JSON.stringify(error));
 		return core.setFailed((error as Error).message);
