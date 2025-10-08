@@ -77,9 +77,9 @@ export async function run(): Promise<void> {
 			).toString("base64");
 			exec.exec("git", [
 				"config",
-				"--local",
+				"--global",
 				"--unset-all",
-				"",
+				"http.https://github.com/.extraheader",
 				"^AUTHORIZATION: basic",
 			]);
 

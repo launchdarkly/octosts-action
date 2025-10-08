@@ -56921,9 +56921,9 @@ function run() {
                 const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString("base64");
                 exec.exec("git", [
                     "config",
-                    "--local",
+                    "--global",
                     "--unset-all",
-                    "",
+                    "http.https://github.com/.extraheader",
                     "^AUTHORIZATION: basic",
                 ]);
                 // Set the token as a git credential
