@@ -75,7 +75,7 @@ export async function run(): Promise<void> {
 			const b64Token = Buffer.from(
 				`x-access-token:${octoStsRepJson?.token as string}`,
 			).toString("base64");
-			exec.exec("git", [
+			await exec.exec("git", [
 				"config",
 				"--global",
 				"--unset-all",
@@ -84,13 +84,13 @@ export async function run(): Promise<void> {
 			]);
 
 			// Set the token as a git credential
-			exec.exec("git", [
+			await exec.exec("git", [
 				"config",
 				"--global",
 				"http.https://github.com/.extraheader",
 				`AUTHORIZATION: basic ${b64Token}`,
 			]);
-			exec.exec("git", [
+			await exec.exec("git", [
 				"config",
 				"--global",
 				"url.https://github.com/.insteadOf",

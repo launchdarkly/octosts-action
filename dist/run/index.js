@@ -56919,7 +56919,7 @@ function run() {
             core.info(`Created token with hash: ${tokHash}`);
             if (configureGit) {
                 const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString("base64");
-                exec.exec("git", [
+                yield exec.exec("git", [
                     "config",
                     "--global",
                     "--unset-all",
@@ -56927,13 +56927,13 @@ function run() {
                     "^AUTHORIZATION: basic",
                 ]);
                 // Set the token as a git credential
-                exec.exec("git", [
+                yield exec.exec("git", [
                     "config",
                     "--global",
                     "http.https://github.com/.extraheader",
                     `AUTHORIZATION: basic ${b64Token}`,
                 ]);
-                exec.exec("git", [
+                yield exec.exec("git", [
                     "config",
                     "--global",
                     "url.https://github.com/.insteadOf",
