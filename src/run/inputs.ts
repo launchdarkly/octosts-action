@@ -4,17 +4,20 @@ type Inputs = {
 	domain: string;
 	scope: string;
 	identity: string;
+	configureGit: boolean;
 };
 
 export function getInputs(): Inputs {
 	const domain = core.getInput("domain");
 	const scope = core.getInput("scope");
 	const identity = core.getInput("identity");
+	const configureGit = core.getBooleanInput("configure-git");
 
 	return {
 		domain,
 		scope,
 		identity,
+		configureGit,
 	};
 }
 

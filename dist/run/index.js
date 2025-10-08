@@ -56795,10 +56795,12 @@ function getInputs() {
     const domain = core.getInput("domain");
     const scope = core.getInput("scope");
     const identity = core.getInput("identity");
+    const configureGit = core.getBooleanInput("configure-git");
     return {
         domain,
         scope,
         identity,
+        configureGit
     };
 }
 function getActionsEnvVars() {
@@ -56867,6 +56869,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const crypto = __importStar(__nccwpck_require__(7598));
 const core = __importStar(__nccwpck_require__(9999));
+const exec = __importStar(__nccwpck_require__(8872));
 const undici_1 = __nccwpck_require__(8007);
 const inputs_1 = __nccwpck_require__(8642);
 function run() {
@@ -56875,7 +56878,7 @@ function run() {
             const agent = new undici_1.Agent({ allowH2: true });
             (0, undici_1.setGlobalDispatcher)(agent);
             const { actionsToken, actionsUrl } = (0, inputs_1.getActionsEnvVars)();
-            const { domain, scope, identity } = (0, inputs_1.getInputs)();
+            const { domain, scope, identity, configureGit } = (0, inputs_1.getInputs)();
             const ghRep = yield (0, undici_1.fetch)(`${actionsUrl}&audience=${domain}`, {
                 headers: {
                     authorization: `Bearer ${actionsToken}`,
@@ -56913,7 +56916,15 @@ function run() {
             core.setSecret(octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             core.setOutput("token", octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             core.saveState("token", octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
-            return core.info(`Created token with hash: ${tokHash}`);
+            core.info(`Created token with hash: ${tokHash}`);
+            if (configureGit) {
+                const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString('base64');
+                exec.exec('git', ['config', '--local', '--unset-all', '', '^AUTHORIZATION: basic']);
+                // Set the token as a git credential
+                exec.exec('git', ['config', '--global', 'http.https://github.com/.extraheader', `AUTHORIZATION: basic ${b64Token}`]);
+                exec.exec('git', ['config', '--global', 'url.https://github.com/.insteadOf', `git@github.com`]);
+            }
+            return;
         }
         catch (error) {
             core.debug(JSON.stringify(error));

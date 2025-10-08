@@ -18,6 +18,11 @@ inputs:
       is loaded from the provided scope repository, and the filepath .github/chainguard/{identity}.sts.yaml
     required: true
 
+  configure-git:
+    description: |
+      Whether to configure git to use the federated token for authentication.
+    default: 'false'
+
 outputs:
   token:
     description: The federated token to use for authentication
