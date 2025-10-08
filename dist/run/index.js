@@ -56919,13 +56919,19 @@ function run() {
             core.info(`Created token with hash: ${tokHash}`);
             if (configureGit) {
                 const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString("base64");
-                yield exec.exec("git", [
-                    "config",
-                    "--global",
-                    "--unset-all",
-                    "http.https://github.com/.extraheader",
-                    "^AUTHORIZATION: basic",
-                ]);
+                try {
+                    yield exec.exec("git", [
+                        "config",
+                        "--global",
+                        "--unset-all",
+                        "http.https://github.com/.extraheader",
+                        "^AUTHORIZATION: basic",
+                    ]);
+                }
+                catch (_error) {
+                    // Ignore the error if the config key doesn't exist
+                    core.debug("No existing extraheader to unset");
+                }
                 // Set the token as a git credential
                 yield exec.exec("git", [
                     "config",

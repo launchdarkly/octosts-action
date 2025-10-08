@@ -75,13 +75,18 @@ export async function run(): Promise<void> {
 			const b64Token = Buffer.from(
 				`x-access-token:${octoStsRepJson?.token as string}`,
 			).toString("base64");
-			await exec.exec("git", [
-				"config",
-				"--global",
-				"--unset-all",
-				"http.https://github.com/.extraheader",
-				"^AUTHORIZATION: basic",
-			]);
+			try {
+				await exec.exec("git", [
+					"config",
+					"--global",
+					"--unset-all",
+					"http.https://github.com/.extraheader",
+					"^AUTHORIZATION: basic",
+				]);
+			} catch (_error) {
+				// Ignore the error if the config key doesn't exist
+				core.debug("No existing extraheader to unset");
+			}
 
 			// Set the token as a git credential
 			await exec.exec("git", [
