@@ -56800,7 +56800,7 @@ function getInputs() {
         domain,
         scope,
         identity,
-        configureGit
+        configureGit,
     };
 }
 function getActionsEnvVars() {
@@ -56918,11 +56918,27 @@ function run() {
             core.saveState("token", octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token);
             core.info(`Created token with hash: ${tokHash}`);
             if (configureGit) {
-                const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString('base64');
-                exec.exec('git', ['config', '--local', '--unset-all', '', '^AUTHORIZATION: basic']);
+                const b64Token = Buffer.from(`x-access-token:${octoStsRepJson === null || octoStsRepJson === void 0 ? void 0 : octoStsRepJson.token}`).toString("base64");
+                exec.exec("git", [
+                    "config",
+                    "--local",
+                    "--unset-all",
+                    "",
+                    "^AUTHORIZATION: basic",
+                ]);
                 // Set the token as a git credential
-                exec.exec('git', ['config', '--global', 'http.https://github.com/.extraheader', `AUTHORIZATION: basic ${b64Token}`]);
-                exec.exec('git', ['config', '--global', 'url.https://github.com/.insteadOf', `git@github.com`]);
+                exec.exec("git", [
+                    "config",
+                    "--global",
+                    "http.https://github.com/.extraheader",
+                    `AUTHORIZATION: basic ${b64Token}`,
+                ]);
+                exec.exec("git", [
+                    "config",
+                    "--global",
+                    "url.https://github.com/.insteadOf",
+                    `git@github.com`,
+                ]);
             }
             return;
         }
