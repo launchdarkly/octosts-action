@@ -1,6 +1,13 @@
 import * as crypto from "node:crypto";
-import * as core from "@actions/core";
-import * as exec from "@actions/exec";
+import {
+	debug,
+	info,
+	saveState,
+	setFailed,
+	setOutput,
+	setSecret,
+} from "@actions/core";
+import { exec } from "@actions/exec";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
 import { getActionsEnvVars, getInputs } from "./inputs";
 
@@ -27,21 +34,20 @@ export async function run(): Promise<void> {
 		});
 		if (!ghRep.ok) {
 			const errorText = await ghRep.text();
-			return core.setFailed(`Failed to get installation token: ${errorText}`);
+			return setFailed(`Failed to get installation token: ${errorText}`);
 		}
 
 		const ghRepJson = (await ghRep.json()) as GHRep;
-		if (ghRepJson.value !== null) {
-			core.setSecret(ghRepJson.value);
+		if (ghRepJson.value === null) {
+			return setFailed(`Failed to get installation token: body was null`);
 		}
-		core.debug(JSON.stringify(ghRepJson));
+		setSecret(ghRepJson.value);
+		debug(JSON.stringify(ghRepJson));
 
 		const scopes = [scope];
 		const scopesParam = scopes.join(",");
 
-		core.debug(
-			`Creating token for ${identity} using ${scope} against ${domain}`,
-		);
+		debug(`Creating token for ${identity} using ${scope} against ${domain}`);
 		const octoStsRep = await fetch(
 			`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`,
 			{
@@ -53,12 +59,12 @@ export async function run(): Promise<void> {
 
 		if (!octoStsRep.ok) {
 			const errorText = await octoStsRep.text();
-			return core.setFailed(`Failed to fetch from OctoSTS: ${errorText}`);
+			return setFailed(`Failed to fetch from OctoSTS: ${errorText}`);
 		}
 		const octoStsRepJson = (await octoStsRep.json()) as OctoStsRep;
 
 		if (!octoStsRepJson?.token) {
-			return core.setFailed(octoStsRepJson?.message as string);
+			return setFailed(octoStsRepJson?.message as string);
 		}
 
 		const tokHash = crypto
@@ -66,17 +72,17 @@ export async function run(): Promise<void> {
 			.update(octoStsRepJson?.token as string)
 			.digest("hex");
 
-		core.setSecret(octoStsRepJson?.token as string);
-		core.setOutput("token", octoStsRepJson?.token);
-		core.saveState("token", octoStsRepJson?.token);
-		core.info(`Created token with hash: ${tokHash}`);
+		setSecret(octoStsRepJson?.token as string);
+		setOutput("token", octoStsRepJson?.token);
+		saveState("token", octoStsRepJson?.token);
+		info(`Created token with hash: ${tokHash}`);
 
 		if (configureGit) {
 			const b64Token = Buffer.from(
 				`x-access-token:${octoStsRepJson?.token as string}`,
 			).toString("base64");
 			try {
-				await exec.exec("git", [
+				await exec("git", [
 					"config",
 					"--global",
 					"--unset-all",
@@ -85,17 +91,17 @@ export async function run(): Promise<void> {
 				]);
 			} catch (_error) {
 				// Ignore the error if the config key doesn't exist
-				core.debug("No existing extraheader to unset");
+				debug("No existing extraheader to unset");
 			}
 
 			// Set the token as a git credential
-			await exec.exec("git", [
+			await exec("git", [
 				"config",
 				"--global",
 				"http.https://github.com/.extraheader",
 				`AUTHORIZATION: basic ${b64Token}`,
 			]);
-			await exec.exec("git", [
+			await exec("git", [
 				"config",
 				"--global",
 				"url.https://github.com/.insteadOf",
@@ -105,7 +111,7 @@ export async function run(): Promise<void> {
 
 		return;
 	} catch (error) {
-		core.debug(JSON.stringify(error));
-		return core.setFailed((error as Error).message);
+		debug(JSON.stringify(error));
+		return setFailed((error as Error).message);
 	}
 }

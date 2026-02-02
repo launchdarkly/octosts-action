@@ -1,4 +1,4 @@
-import * as core from "@actions/core";
+import { getBooleanInput, getInput, setFailed } from "@actions/core";
 
 type Inputs = {
 	domain: string;
@@ -8,10 +8,10 @@ type Inputs = {
 };
 
 export function getInputs(): Inputs {
-	const domain = core.getInput("domain");
-	const scope = core.getInput("scope");
-	const identity = core.getInput("identity");
-	const configureGit = core.getBooleanInput("configure-git");
+	const domain = getInput("domain");
+	const scope = getInput("scope");
+	const identity = getInput("identity");
+	const configureGit = getBooleanInput("configure-git");
 
 	return {
 		domain,
@@ -29,7 +29,7 @@ export function getActionsEnvVars(): {
 	const actionsUrl = process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
 
 	if (!actionsToken || !actionsUrl) {
-		core.setFailed(
+		setFailed(
 			"Missing required environment variables - have you set 'id-token: write' in your workflow?",
 		);
 	}

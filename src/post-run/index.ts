@@ -1,4 +1,4 @@
-import * as core from "@actions/core";
+import { setFailed } from "@actions/core";
 import { postRun } from "./post-run";
 
-postRun().catch((error) => core.setFailed((error as Error).message));
+postRun().catch((error) => setFailed((error as Error).message));

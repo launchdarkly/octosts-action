@@ -1,4 +1,4 @@
-import * as core from "@actions/core";
+import { setFailed } from "@actions/core";
 import { run } from "./octosts-action";
 
-run().catch((error) => core.setFailed((error as Error).message));
+run().catch((error) => setFailed((error as Error).message));
