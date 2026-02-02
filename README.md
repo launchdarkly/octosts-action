@@ -5,8 +5,7 @@
 <!-- action-docs-description source="action.yml" -->
 ## Description
 
-This action exchanges the workflow's identity token for a GitHub App Token from the OctoSTS service,
-in accordance with the configured trust policy at the repo, or organisation, level.
+Exchanges the workflow's identity token for a GitHub token from the OctoSTS service, using a configured trust policy.
 <!-- action-docs-description source="action.yml" -->
 
 <!-- action-docs-inputs source="action.yml" -->
