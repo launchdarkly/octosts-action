@@ -6,10 +6,13 @@ import {
 	setFailed,
 	setOutput,
 	setSecret,
+	warning,
 } from "@actions/core";
 import { exec } from "@actions/exec";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
 import { getActionsEnvVars, getInputs } from "./inputs";
+
+const MAX_RETRIES = 3;
 
 interface GHRep {
 	value: string;
@@ -20,6 +23,35 @@ interface OctoStsRep {
 	message?: string;
 }
 
+async function fetchWithRetry(
+	label: string,
+	fn: () => Promise<Response>,
+): Promise<Response> {
+	let lastError: unknown;
+	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			const response = await fn();
+			if (response.ok || attempt === MAX_RETRIES) {
+				return response;
+			}
+			const errorText = await response.text();
+			warning(
+				`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`,
+			);
+		} catch (error) {
+			lastError = error;
+			warning(
+				`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${(error as Error).message}`,
+			);
+			if (attempt === MAX_RETRIES) {
+				throw lastError;
+			}
+		}
+	}
+	// Unreachable, but satisfies TypeScript
+	throw lastError;
+}
+
 export async function run(): Promise<void> {
 	try {
 		const agent = new Agent({ allowH2: true });
@@ -27,11 +59,13 @@ export async function run(): Promise<void> {
 		const { actionsToken, actionsUrl } = getActionsEnvVars();
 		const { domain, scope, identity, configureGit } = getInputs();
 
-		const ghRep = await fetch(`${actionsUrl}&audience=${domain}`, {
-			headers: {
-				authorization: `Bearer ${actionsToken}`,
-			},
-		});
+		const ghRep = await fetchWithRetry("GitHub Actions OIDC token fetch", () =>
+			fetch(`${actionsUrl}&audience=${domain}`, {
+				headers: {
+					authorization: `Bearer ${actionsToken}`,
+				},
+			}),
+		);
 		if (!ghRep.ok) {
 			const errorText = await ghRep.text();
 			return setFailed(`Failed to get installation token: ${errorText}`);
@@ -48,13 +82,15 @@ export async function run(): Promise<void> {
 		const scopesParam = scopes.join(",");
 
 		debug(`Creating token for ${identity} using ${scope} against ${domain}`);
-		const octoStsRep = await fetch(
-			`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`,
-			{
-				headers: {
-					authorization: `Bearer ${ghRepJson.value}`,
+		const octoStsRep = await fetchWithRetry("OctoSTS token fetch", () =>
+			fetch(
+				`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`,
+				{
+					headers: {
+						authorization: `Bearer ${ghRepJson.value}`,
+					},
 				},
-			},
+			),
 		);
 
 		if (!octoStsRep.ok) {
