@@ -65578,7 +65578,7 @@ function error(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function warning(message, properties = {}) {
-    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('warning', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Adds a notice issue
@@ -65716,17 +65716,40 @@ function getActionsEnvVars() {
 
 
 
+const MAX_RETRIES = 3;
+async function fetchWithRetry(label, fn) {
+    let lastError;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const response = await fn();
+            if (response.ok || attempt === MAX_RETRIES) {
+                return response;
+            }
+            const errorText = await response.text();
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`);
+        }
+        catch (error) {
+            lastError = error;
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${error.message}`);
+            if (attempt === MAX_RETRIES) {
+                throw lastError;
+            }
+        }
+    }
+    // Unreachable, but satisfies TypeScript
+    throw lastError;
+}
 async function run() {
     try {
         const agent = new node_modules_undici/* Agent */.g6({ allowH2: true });
         (0,node_modules_undici/* setGlobalDispatcher */.bj)(agent);
         const { actionsToken, actionsUrl } = getActionsEnvVars();
         const { domain, scope, identity, configureGit } = getInputs();
-        const ghRep = await (0,node_modules_undici/* fetch */.hd)(`${actionsUrl}&audience=${domain}`, {
+        const ghRep = await fetchWithRetry("GitHub Actions OIDC token fetch", () => (0,node_modules_undici/* fetch */.hd)(`${actionsUrl}&audience=${domain}`, {
             headers: {
                 authorization: `Bearer ${actionsToken}`,
             },
-        });
+        }));
         if (!ghRep.ok) {
             const errorText = await ghRep.text();
             return setFailed(`Failed to get installation token: ${errorText}`);
@@ -65740,11 +65763,11 @@ async function run() {
         const scopes = [scope];
         const scopesParam = scopes.join(",");
         core_debug(`Creating token for ${identity} using ${scope} against ${domain}`);
-        const octoStsRep = await (0,node_modules_undici/* fetch */.hd)(`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`, {
+        const octoStsRep = await fetchWithRetry("OctoSTS token fetch", () => (0,node_modules_undici/* fetch */.hd)(`https://${domain}/sts/exchange?scope=${scope}&scopes=${scopesParam}&identity=${identity}`, {
             headers: {
                 authorization: `Bearer ${ghRepJson.value}`,
             },
-        });
+        }));
         if (!octoStsRep.ok) {
             const errorText = await octoStsRep.text();
             return setFailed(`Failed to fetch from OctoSTS: ${errorText}`);
