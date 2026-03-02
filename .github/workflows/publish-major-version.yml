@@ -16,5 +16,10 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - uses: actions/checkout@v6
-      - run: git tag -a ${{ github.event.inputs.major-version }} ${{ github.event.inputs.commit-sha }}
-      - run: git push origin ${{ github.event.inputs.major-version }}
+        with:
+          ref: ${{ github.event.inputs.commit-sha }}
+      - run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "actions@github.com"
+      - run: git tag -a "${{ github.event.inputs.major-version }}" ${{ github.event.inputs.commit-sha }}
+      - run: git push origin "${{ github.event.inputs.major-version }}"
