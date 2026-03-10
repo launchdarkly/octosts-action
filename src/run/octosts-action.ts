@@ -143,6 +143,14 @@ export async function run(): Promise<void> {
 				"url.https://github.com/.insteadOf",
 				`git@github.com`,
 			]);
+
+			await exec("git", ["config", "--global", "user.name", "octosts"]);
+			await exec("git", [
+				"config",
+				"--global",
+				"user.email",
+				"octosts@users.noreply.github.com",
+			]);
 		}
 
 		return;
