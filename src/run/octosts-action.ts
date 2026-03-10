@@ -144,7 +144,12 @@ export async function run(): Promise<void> {
 				`git@github.com`,
 			]);
 
-			await exec("git", ["config", "--global", "user.name", "launchdarkly-octoauth[bot]"]);
+			await exec("git", [
+				"config",
+				"--global",
+				"user.name",
+				"launchdarkly-octoauth[bot]",
+			]);
 			await exec("git", [
 				"config",
 				"--global",
