@@ -29,6 +29,7 @@ inputs:
 outputs:
   token:
     description: The federated token to use for authentication
+    value: ${{ steps.octo-sts.outputs.token }}
 
 runs:
   using: node24
