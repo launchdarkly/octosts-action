@@ -65811,12 +65811,12 @@ async function run() {
                 "url.https://github.com/.insteadOf",
                 `git@github.com`,
             ]);
-            await exec_exec("git", ["config", "--global", "user.name", "octosts"]);
+            await exec_exec("git", ["config", "--global", "user.name", "launchdarkly-octoauth[bot]"]);
             await exec_exec("git", [
                 "config",
                 "--global",
                 "user.email",
-                "octosts@users.noreply.github.com",
+                "launchdarkly-octoauth[bot]@users.noreply.github.com",
             ]);
         }
         return;
