@@ -143,6 +143,19 @@ export async function run(): Promise<void> {
 				"url.https://github.com/.insteadOf",
 				`git@github.com`,
 			]);
+
+			await exec("git", [
+				"config",
+				"--global",
+				"user.name",
+				"launchdarkly-octoauth[bot]",
+			]);
+			await exec("git", [
+				"config",
+				"--global",
+				"user.email",
+				"launchdarkly-octoauth[bot]@users.noreply.github.com",
+			]);
 		}
 
 		return;
