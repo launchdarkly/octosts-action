@@ -1,0 +1,10 @@
+issuer: https://token.actions.githubusercontent.com
+subject: repo:launchdarkly/octosts-action:ref:refs/heads/main
+claim_pattern:
+  event_name: workflow_dispatch
+  job_workflow_ref: launchdarkly/octosts-action/\.github/workflows/release\.yaml@.*
+  ref: refs/heads/main
+  ref_protected: "true"
+
+permissions:
+  contents: write

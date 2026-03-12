@@ -1,0 +1,121 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-slim
+    steps:
+      - uses: launchdarkly/octosts-action@v1
+        id: token
+        with:
+          scope: ${{ github.repository }}
+          identity: self.release
+
+      - name: Check input is valid semver
+        run: |
+          ver="${{ inputs.version }}"
+          if [[ "$ver" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            exit 0
+          else
+            echo "Invalid semver"
+            exit 1
+          fi
+
+      - name: Check for an existing tag
+        id: check-for-existing-tag
+        uses: actions/github-script@v8
+        env:
+          VERSION: ${{ inputs.version }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          retries: 3
+          script: |
+            const version = process.env.VERSION;
+            const tag = version.startsWith('v') ? version : `v${version}`;
+            try {
+              await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `refs/tags/${tag}`
+              });
+
+              const errorMessage = `Version ${version} cannot be created because the Git tag "${tag}" already exists. Change the contents of the file to a different version if you intend to create a new Git tag.`;
+              core.error(errorMessage, {
+                title: "Duplicate Git tag",
+                file: '',
+                startLine: 0,
+                startColumn: 0
+              });
+              process.exitCode = 1;
+
+            } catch (err) {
+              if (err.status == 404) {
+                core.info(`The "${tag}" Git tag does not exist. A new GitHub release and Git tag will be created.`);
+              } else {
+                core.setFailed(err);
+              }
+            }
+
+      - name: Create release and update major tag
+        id: release
+        uses: actions/github-script@v8
+        env:
+          VERSION: ${{ inputs.version }}
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const version = process.env.VERSION;
+            const tag = version.startsWith('v') ? version : `v${version}`;
+            const majorMatch = tag.match(/^v(\d+)/);
+            const majorTag = majorMatch ? `v${majorMatch[1]}` : null;
+            const sha = context.sha;
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              target_commitish: sha,
+              generate_release_notes: true
+            });
+            core.info(`Created release ${tag} with auto-generated release notes.`);
+
+            if (majorTag) {
+              const ref = `refs/tags/${majorTag}`;
+              try {
+                await github.rest.git.getRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/tags/${majorTag}`
+                });
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref,
+                  sha,
+                  force: true
+                });
+                core.info(`Updated major tag "${majorTag}" to point to ${sha}.`);
+              } catch (err) {
+                if (err.status === 404) {
+                  await github.rest.git.createRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref,
+                    sha
+                  });
+                  core.info(`Created major tag "${majorTag}" at ${sha}.`);
+                } else {
+                  throw err;
+                }
+              }
+            }
