@@ -37,5 +37,10 @@
 		"@vercel/ncc": "^0.38.4",
 		"concurrently": "^9.2.1",
 		"typescript": "^5.9.3"
+	},
+	"pnpm": {
+		"overrides": {
+			"shell-quote": ">=1.8.4"
+		}
 	}
 }
