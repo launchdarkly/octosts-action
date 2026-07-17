@@ -68027,6 +68027,18 @@ async function run() {
                 "http.https://github.com/.extraheader",
                 `AUTHORIZATION: basic ${b64Token}`,
             ]);
+            // Do not apply the federated token to the workflow's own repository, so its
+            // git operations keep using the repository's own credentials. An empty,
+            // more-specific extraheader resets the header for this repository only.
+            const selfRepo = process.env.GITHUB_REPOSITORY;
+            if (selfRepo) {
+                await exec_exec("git", [
+                    "config",
+                    "--global",
+                    `http.https://github.com/${selfRepo}.extraheader`,
+                    "",
+                ]);
+            }
             await exec_exec("git", [
                 "config",
                 "--global",
