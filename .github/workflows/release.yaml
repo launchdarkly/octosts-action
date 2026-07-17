@@ -46,7 +46,7 @@ jobs:
               await github.rest.git.getRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: `refs/tags/${tag}`
+                ref: `tags/${tag}`
               });
 
               const errorMessage = `Version ${version} cannot be created because the Git tag "${tag}" already exists. Change the contents of the file to a different version if you intend to create a new Git tag.`;
@@ -95,7 +95,7 @@ jobs:
                 await github.rest.git.getRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  ref: `refs/tags/${majorTag}`
+                  ref: `tags/${majorTag}`
                 });
                 await github.rest.git.updateRef({
                   owner: context.repo.owner,
