@@ -16,9 +16,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: pnpm install
-      - run: pnpm biome ci
+      - run: pnpm run lint
       - run: pnpm run format
       - name: Verify that generated code is committed
         run: |
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'pnpm'
+          cache: "pnpm"
       - run: pnpm install
       - run: pnpm run release
       - name: Verify that generated code is committed

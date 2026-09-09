@@ -1,27 +1,32 @@
 repos:
   - repo: local
     hooks:
-      - id: run-biome
-        name: "Run Biome"
-        entry: pnpx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true
+      - id: run-oxlint
+        name: "Run oxlint"
+        entry: pnpx oxlint --fix --deny-warnings --no-error-on-unmatched-pattern
         language: system
-        types: [text]
-        stages: [ "pre-commit" ]
+        files: \.(m?ts|ya?ml)$
+        stages: ["pre-commit"]
+      - id: run-oxfmt
+        name: "Run oxfmt"
+        entry: pnpx oxfmt --write --no-error-on-unmatched-pattern
+        language: system
+        files: \.(m?ts|ya?ml)$
+        stages: ["pre-commit"]
       - id: generate-readme
         name: "Generate action readme files"
         language: system
         entry: pnpx action-docs --no-banner --update-readme
         files: action.yml$
-        stages: [ "pre-commit" ]
-
+        stages: ["pre-commit"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: '^dist/.*$'
+        exclude: "^dist/.*$"
       - id: end-of-file-fixer
-        exclude: '^dist/.*$'
+        exclude: "^dist/.*$"
       - id: check-yaml
       - id: no-commit-to-branch
-        args: [ --branch, main ]
+        args: [--branch, main]
