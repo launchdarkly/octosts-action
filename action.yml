@@ -1,8 +1,8 @@
-name: 'OctoSTS'
-author: 'LaunchDarkly'
+name: "OctoSTS"
+author: "LaunchDarkly"
 branding:
-  icon: 'shield'
-  color: 'yellow'
+  icon: "shield"
+  color: "yellow"
 description: |
   Exchanges the workflow's identity token for a GitHub token from the OctoSTS service, using a configured trust policy.
 
@@ -24,7 +24,7 @@ inputs:
   configure-git:
     description: |
       Whether to configure git to use the federated token for authentication.
-    default: 'false'
+    default: "false"
 
 outputs:
   token:
@@ -33,5 +33,5 @@ outputs:
 
 runs:
   using: node24
-  main: 'dist/run/index.js'
-  post: 'dist/post-run/index.js'
+  main: "dist/run/index.js"
+  post: "dist/post-run/index.js"

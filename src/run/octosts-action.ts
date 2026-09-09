@@ -94,7 +94,7 @@ export async function run(): Promise<void> {
 					"http.https://github.com/.extraheader",
 					"^AUTHORIZATION: basic",
 				]);
-			} catch (_error) {
+			} catch {
 				// Ignore the error if the config key doesn't exist
 				debug("No existing extraheader to unset");
 			}

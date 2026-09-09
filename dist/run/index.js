@@ -68020,7 +68020,7 @@ async function run() {
                     "^AUTHORIZATION: basic",
                 ]);
             }
-            catch (_error) {
+            catch {
                 // Ignore the error if the config key doesn't exist
                 core_debug("No existing extraheader to unset");
             }

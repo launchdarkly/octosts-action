@@ -1,4 +1,4 @@
-import {getState, info, setFailed, warning} from "@actions/core";
+import { getState, info, setFailed, warning } from "@actions/core";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
 import { fetchWithRetry } from "../lib/fetch";
 
@@ -22,9 +22,9 @@ export async function postRun(): Promise<void> {
 		if (rep.status === 204) {
 			info("Successfully deleted token");
 		} else {
-            return warning(
-                `Failed to delete token: ${rep.status} ${rep.statusText}. Token will be automatically revoked after 8 hours.`,
-            );
+			return warning(
+				`Failed to delete token: ${rep.status} ${rep.statusText}. Token will be automatically revoked after 8 hours.`,
+			);
 		}
 	} catch (error) {
 		return setFailed((error as Error).message);

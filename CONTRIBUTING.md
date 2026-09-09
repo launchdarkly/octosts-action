@@ -14,5 +14,5 @@ To install the repo's git hooks, run `pre-commit install`.
 
 **pre-commit**
 
-The pre-commit hooks check that relevant project files are formatted with `biome`, that all files end with a newline,
+The pre-commit hooks check that relevant project files are formatted with `oxfmt`, linted with `oxlint`, that all files end with a newline,
 and that the README is up to date with the latest configuration in `action.yml`.`

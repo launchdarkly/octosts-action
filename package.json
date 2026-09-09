@@ -12,9 +12,9 @@
 		"build": "tsc --outDir $(mktemp -d)",
 		"release": "concurrently \"ncc build src/run/index.ts --target es2020 -o dist/run\" \"ncc build src/post-run/index.ts --target es2020 -o dist/post-run\"",
 		"check-all": "concurrently \"npm:format-check\" \"npm:lint\" \"npm:build\"",
-		"format": "biome format --write",
-		"format-check": "biome check src/**/*.ts",
-		"lint": "biome lint src/**/*.ts"
+		"format": "oxfmt src action.yml .github .pre-commit-config.yaml",
+		"format-check": "oxfmt --check src action.yml .github .pre-commit-config.yaml",
+		"lint": "oxlint --deny-warnings src"
 	},
 	"keywords": [
 		"Actions",
@@ -32,10 +32,11 @@
 		"undici": "^7.28.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.13",
 		"@types/node": "^25.2.0",
 		"@vercel/ncc": "^0.38.4",
 		"concurrently": "^9.2.3",
+		"oxfmt": "^0.67.0",
+		"oxlint": "^1.82.0",
 		"typescript": "^5.9.3"
 	}
 }
