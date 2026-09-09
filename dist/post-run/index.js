@@ -67800,7 +67800,7 @@ function error(message, properties = {}) {
  * @param properties optional properties to add to the annotation.
  */
 function warning(message, properties = {}) {
-    issueCommand('warning', toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+    command_issueCommand('warning', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
  * Adds a notice issue
@@ -67904,7 +67904,34 @@ function getIDToken(aud) {
 //# sourceMappingURL=core.js.map
 // EXTERNAL MODULE: ./node_modules/.pnpm/undici@7.28.0/node_modules/undici/index.js
 var node_modules_undici = __nccwpck_require__(7200);
+;// CONCATENATED MODULE: ./src/lib/fetch.ts
+
+const MAX_RETRIES = 3;
+async function fetchWithRetry(label, fn) {
+    let lastError;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const response = await fn();
+            if (response.ok || attempt === MAX_RETRIES) {
+                return response;
+            }
+            const errorText = await response.text();
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`);
+        }
+        catch (error) {
+            lastError = error;
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${error.message}`);
+            if (attempt === MAX_RETRIES) {
+                throw lastError;
+            }
+        }
+    }
+    // Unreachable, but satisfies TypeScript
+    throw lastError;
+}
+
 ;// CONCATENATED MODULE: ./src/post-run/post-run.ts
+
 
 
 async function postRun() {
@@ -67912,18 +67939,18 @@ async function postRun() {
         const agent = new node_modules_undici/* Agent */.g6({ allowH2: true });
         (0,node_modules_undici/* setGlobalDispatcher */.bj)(agent);
         const token = getState("token");
-        const rep = await (0,node_modules_undici/* fetch */.hd)("https://api.github.com/installation/token", {
+        const rep = await fetchWithRetry("Revoke issued token", () => (0,node_modules_undici/* fetch */.hd)("https://api.github.com/installation/token", {
             method: "DELETE",
             headers: {
                 authorization: `Bearer ${token}`,
                 accept: "application/vnd.github+json",
             },
-        });
+        }));
         if (rep.status === 204) {
             info("Successfully deleted token");
         }
         else {
-            return setFailed(`Failed to delete token: ${rep.status} ${rep.statusText}`);
+            return warning(`Failed to delete token: ${rep.status} ${rep.statusText}. Token will be automatically revoked after 8 hours.`);
         }
     }
     catch (error) {

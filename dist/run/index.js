@@ -67906,6 +67906,32 @@ function getIDToken(aud) {
 var external_node_crypto_ = __nccwpck_require__(7598);
 // EXTERNAL MODULE: ./node_modules/.pnpm/undici@7.28.0/node_modules/undici/index.js
 var node_modules_undici = __nccwpck_require__(7200);
+;// CONCATENATED MODULE: ./src/lib/fetch.ts
+
+const MAX_RETRIES = 3;
+async function fetchWithRetry(label, fn) {
+    let lastError;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            const response = await fn();
+            if (response.ok || attempt === MAX_RETRIES) {
+                return response;
+            }
+            const errorText = await response.text();
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`);
+        }
+        catch (error) {
+            lastError = error;
+            warning(`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${error.message}`);
+            if (attempt === MAX_RETRIES) {
+                throw lastError;
+            }
+        }
+    }
+    // Unreachable, but satisfies TypeScript
+    throw lastError;
+}
+
 ;// CONCATENATED MODULE: ./src/run/inputs.ts
 
 function getInputs() {
@@ -67938,29 +67964,7 @@ function getActionsEnvVars() {
 
 
 
-const MAX_RETRIES = 3;
-async function fetchWithRetry(label, fn) {
-    let lastError;
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-            const response = await fn();
-            if (response.ok || attempt === MAX_RETRIES) {
-                return response;
-            }
-            const errorText = await response.text();
-            warning(`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`);
-        }
-        catch (error) {
-            lastError = error;
-            warning(`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${error.message}`);
-            if (attempt === MAX_RETRIES) {
-                throw lastError;
-            }
-        }
-    }
-    // Unreachable, but satisfies TypeScript
-    throw lastError;
-}
+
 async function run() {
     try {
         const agent = new node_modules_undici/* Agent */.g6({ allowH2: true });

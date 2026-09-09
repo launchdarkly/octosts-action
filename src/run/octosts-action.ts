@@ -6,13 +6,11 @@ import {
 	setFailed,
 	setOutput,
 	setSecret,
-	warning,
 } from "@actions/core";
 import { exec } from "@actions/exec";
 import { Agent, fetch, setGlobalDispatcher } from "undici";
+import { fetchWithRetry } from "../lib/fetch";
 import { getActionsEnvVars, getInputs } from "./inputs";
-
-const MAX_RETRIES = 3;
 
 interface GHRep {
 	value: string;
@@ -21,35 +19,6 @@ interface GHRep {
 interface OctoStsRep {
 	token?: string;
 	message?: string;
-}
-
-async function fetchWithRetry(
-	label: string,
-	fn: () => Promise<Response>,
-): Promise<Response> {
-	let lastError: unknown;
-	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-		try {
-			const response = await fn();
-			if (response.ok || attempt === MAX_RETRIES) {
-				return response;
-			}
-			const errorText = await response.text();
-			warning(
-				`${label} attempt ${attempt}/${MAX_RETRIES} failed with status ${response.status}: ${errorText}`,
-			);
-		} catch (error) {
-			lastError = error;
-			warning(
-				`${label} attempt ${attempt}/${MAX_RETRIES} threw: ${(error as Error).message}`,
-			);
-			if (attempt === MAX_RETRIES) {
-				throw lastError;
-			}
-		}
-	}
-	// Unreachable, but satisfies TypeScript
-	throw lastError;
 }
 
 export async function run(): Promise<void> {
