@@ -4,7 +4,7 @@ import { fetchWithRetry } from "../lib/fetch";
 
 export async function postRun(): Promise<void> {
 	try {
-		const agent = new Agent({ allowH2: true });
+		const agent = new Agent();
 		setGlobalDispatcher(agent);
 
 		const token = getState("token");

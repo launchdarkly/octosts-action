@@ -23,7 +23,7 @@ interface OctoStsRep {
 
 export async function run(): Promise<void> {
 	try {
-		const agent = new Agent({ allowH2: true });
+		const agent = new Agent();
 		setGlobalDispatcher(agent);
 		const { actionsToken, actionsUrl } = getActionsEnvVars();
 		const { domain, scope, identity, configureGit } = getInputs();

@@ -26,17 +26,17 @@
 	"license": "Apache-2.0",
 	"packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34",
 	"dependencies": {
-		"@actions/core": "^3.0.0",
+		"@actions/core": "^3.0.1",
 		"@actions/exec": "^3.0.0",
-		"@actions/github": "^9.0.0",
-		"undici": "^7.28.0"
+		"@actions/github": "^9.1.1",
+		"undici": "^8.10.2"
 	},
 	"devDependencies": {
-		"@types/node": "^25.2.0",
-		"@vercel/ncc": "^0.38.4",
-		"concurrently": "^9.2.3",
+		"@types/node": "^26.5.0",
+		"@vercel/ncc": "^0.45.0",
+		"concurrently": "^10.0.5",
 		"oxfmt": "^0.67.0",
 		"oxlint": "^1.82.0",
-		"typescript": "^5.9.3"
+		"typescript": "^6.0.3"
 	}
 }
