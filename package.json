@@ -34,7 +34,7 @@
 	"devDependencies": {
 		"@types/node": "^26.5.0",
 		"@vercel/ncc": "^0.45.0",
-		"concurrently": "^10.0.5",
+		"concurrently": "^10.0.6",
 		"oxfmt": "^0.67.0",
 		"oxlint": "^1.82.0",
 		"typescript": "^6.0.3"
